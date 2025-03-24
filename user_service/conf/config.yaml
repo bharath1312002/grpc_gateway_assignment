@@ -1,0 +1,13 @@
+cassandra_details:
+  address: "127.0.0.1"
+  key_space: "user_service"
+  port : 9042
+
+grpc_details:
+  network: "tcp"
+  address: ":50051"
+  endpoint: "localhost:50051"
+
+http_details:
+  port: ":8080"
+

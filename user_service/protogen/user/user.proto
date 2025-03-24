@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "user_service/protogen/user";
+
+import "proto/google/api/annotations.proto";
+import "proto/protogen/validate/validate.proto";
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user"
+      body: "*"
+    };
+  }
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      put: "/v1/user/{id}"
+      body: "*"
+    };
+  }
+  rpc BlockUser(BlockUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/{id}/block"
+    };
+  }
+  rpc UnblockUser(UnblockUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/{id}/unblock"
+    };
+  }
+  rpc UpdateContact(UpdateContactRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      patch: "/v1/user/{id}/contact"
+      body: "*"
+    };
+  }
+  rpc GetUser(GetUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      get: "/v1/user"
+    };
+  }
+}
+
+message CreateUserRequest {
+  string first_name = 1 [(validate.rules).string = {min_len: 1, max_len: 50}]; // First name is required and must be 1-50 characters
+  string last_name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}]; // Last name is required and must be 1-50 characters
+  string gender = 3 [(validate.rules).string = {in: ["Male", "Female", "Other"]}]; // Gender must be one of these values
+  string date_of_birth = 4 [(validate.rules).string = {pattern: "^\\d{4}-\\d{2}-\\d{2}$"}]; // Date of birth must be in YYYY-MM-DD format
+  string phone_number = 5 [(validate.rules).string = {pattern: "^\\+?[1-9]\\d{1,14}$"}]; // Phone number must be in E.164 format
+  string email = 6 [(validate.rules).string.email = true]; // Email must be valid
+}
+
+message UpdateUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true]; // ID must be a valid UUID
+  string first_name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string last_name = 3 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string gender = 4 [(validate.rules).string = {in: ["Male", "Female", "Other"]}];
+  string date_of_birth = 5 [(validate.rules).string = {pattern: "^\\d{4}-\\d{2}-\\d{2}$"}];
+}
+
+message BlockUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true]; // ID must be a valid UUID
+}
+
+message UnblockUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true]; // ID must be a valid UUID
+}
+
+message UpdateContactRequest {
+  string id = 1 [(validate.rules).string.uuid = true]; // ID must be a valid UUID
+  string phone_number = 2 [(validate.rules).string = {pattern: "^\\+?[1-9]\\d{1,14}$"}]; // Phone number must be in E.164 format
+  string email = 3 [(validate.rules).string.email = true]; // Email must be valid
+}
+
+message GetUserRequest {
+  oneof identifier {
+    string phone_number = 1 [(validate.rules).string = {pattern: "^\\+?[1-9]\\d{1,14}$"}]; // Phone number must be in E.164 format
+    string email = 2 [(validate.rules).string.email = true]; // Email must be valid
+  }
+}
+
+message UserResponse {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string gender = 4;
+  string date_of_birth = 5;
+  string phone_number = 6;
+  string email = 7;
+  bool is_blocked = 8;
+}
